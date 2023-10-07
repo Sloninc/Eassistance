@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Telegram.Bot.Types;
+using Telegram.Bot;
 
 namespace Eassistance.Controllers
 {
@@ -7,10 +8,12 @@ namespace Eassistance.Controllers
     [Route("/")]
     public class BotController : ControllerBase
     {
+        private TelegramBotClient bot = Bot.GetTelegramBot();
         [HttpPost]
-        public void Post(Update update) //Сюда будут приходить апдейты
+        public async Task Post(Update update) //Сюда будут приходить апдейты
         {
-            Console.WriteLine(update.Message.Text);
+            long chatId = update.Message.Chat.Id; //получаем айди чата, куда нам сказать привет
+            await bot.SendTextMessageAsync(chatId, "Привет!");
         }
         [HttpGet]
         public string Get()
