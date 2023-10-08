@@ -7,7 +7,7 @@ namespace Eassistance.Controllers.Commands
     {
         public TelegramBotClient Client => Bot.GetTelegramBot();
 
-        public string Name => "/start";
+        public string Name => "start";
 
         public async Task Execute(Update update)
         {

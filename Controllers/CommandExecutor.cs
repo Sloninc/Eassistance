@@ -9,10 +9,7 @@ namespace Eassistance.Controllers
         private IListener? listener = null;
         public CommandExecutor()
         {
-            commands = new List<ICommand>();
-            {
-                new StartCommand();
-            }
+            commands = GetCommands();
         }
         public async Task GetUpdate(Update update)
         {
@@ -43,6 +40,35 @@ namespace Eassistance.Controllers
         public void StopListen()
         {
             listener = null;
+        }
+        private List<ICommand> GetCommands()
+        {
+            var types = AppDomain
+                      .CurrentDomain
+                      .GetAssemblies()
+                      .SelectMany(assembly => assembly.GetTypes())
+                      .Where(type => typeof(ICommand).IsAssignableFrom(type))
+                      .Where(type => type.IsClass);
+
+            List<ICommand> commands = new List<ICommand>();
+            foreach (var type in types)
+            {
+                ICommand? command;
+                if (typeof(IListener).IsAssignableFrom(type))
+                {
+                    command = Activator.CreateInstance(type, this) as ICommand;
+                }
+                else
+                {
+                    command = Activator.CreateInstance(type) as ICommand;
+                }
+
+                if (command != null)
+                {
+                    commands.Add(command);
+                }
+            }
+            return commands;
         }
     }
 }

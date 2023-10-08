@@ -9,14 +9,23 @@ namespace Eassistance.Controllers
     public class BotController : ControllerBase
     {
         //private TelegramBotClient bot = Bot.GetTelegramBot();
-        private UpdateDistributor<CommandExecutor> updateDistributor = new UpdateDistributor<CommandExecutor>();
+        private static UpdateDistributor<CommandExecutor> updateDistributor { get; set; }
+        public static UpdateDistributor<CommandExecutor> GetUpdateDistributor()
+        {
+            if (updateDistributor != null)
+            {
+                return updateDistributor;
+            }
+            updateDistributor = new UpdateDistributor<CommandExecutor>();
+            return updateDistributor;
+        }
 
         [HttpPost]
         public async void Post(Update update)
         {
             if (update.Message == null) 
                 return;
-            await updateDistributor.GetUpdate(update);
+            await GetUpdateDistributor().GetUpdate(update);
         }
         [HttpGet]
         public string Get()

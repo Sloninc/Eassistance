@@ -19,7 +19,6 @@ namespace Eassistance.Controllers.Commands
             long chatId = update.Message.Chat.Id;
             Executor.StartListen(this); //говорим, что теперь нам надо отправлять апдейты
             await Client.SendTextMessageAsync(chatId, "Введите номер!");
-
         }
         public async Task GetUpdate(Update update)
         {
