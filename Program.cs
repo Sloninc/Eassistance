@@ -9,6 +9,7 @@ namespace Eassistance
             // Add services to the container.
 
             builder.Services.AddControllers().AddNewtonsoftJson();
+            builder.Services.AddDbContext<DataContext>();
 
             var app = builder.Build();
 

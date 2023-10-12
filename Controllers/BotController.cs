@@ -5,32 +5,39 @@ using Telegram.Bot;
 namespace Eassistance.Controllers
 {
     [ApiController]
-    [Route("/")]
+    [Route("api/message/update")]
     public class BotController : ControllerBase
     {
-        //private TelegramBotClient bot = Bot.GetTelegramBot();
-        private static UpdateDistributor<CommandExecutor> updateDistributor { get; set; }
-        public static UpdateDistributor<CommandExecutor> GetUpdateDistributor()
+        private readonly ICommandExecutor _commandExecutor;
+
+        public TelegramBotController(ICommandExecutor commandExecutor)
         {
-            if (updateDistributor != null)
-            {
-                return updateDistributor;
-            }
-            updateDistributor = new UpdateDistributor<CommandExecutor>();
-            return updateDistributor;
+            _commandExecutor = commandExecutor;
         }
 
         [HttpPost]
-        public async void Post(Update update)
+        public async Task<IActionResult> Update([FromBody] object update)
         {
-            if (update.Message == null) 
-                return;
-            await GetUpdateDistributor().GetUpdate(update);
-        }
-        [HttpGet]
-        public string Get()
-        {
-            return "Telegram bot was started";
+            // /start => register user
+
+            var upd = JsonConvert.DeserializeObject<Update>(update.ToString());
+
+            if (upd?.Message?.Chat == null && upd?.CallbackQuery == null)
+            {
+                return Ok();
+            }
+
+            try
+            {
+                await _commandExecutor.Execute(upd);
+            }
+            catch (Exception e)
+            {
+                return Ok();
+            }
+
+            return Ok();
         }
     }
+
 }
