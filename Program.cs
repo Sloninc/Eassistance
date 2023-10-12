@@ -1,3 +1,8 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Eassistance.Infrastructure;
+
 namespace Eassistance
 {
     public class Program
@@ -9,7 +14,9 @@ namespace Eassistance
             // Add services to the container.
 
             builder.Services.AddControllers().AddNewtonsoftJson();
-            builder.Services.AddDbContext<DataContext>();
+            builder.Services.AddDbContext<DataContext>(opt =>
+                opt.UseSqlServer(_configuration.GetConnectionString("DataBase")), ServiceLifetime.Singleton);
+            builder.Services.AddServices();
 
             var app = builder.Build();
 
