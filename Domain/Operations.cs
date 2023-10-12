@@ -6,7 +6,7 @@ namespace Eassistance.Domain
     {
         [Required]
         public string Name { get; set; }
-        public string Description { get; set; }
+        public List<string> Steps { get; set; }
         public Guid UnitId { get; set; }
 
         [ForeignKey("UnitId")]
