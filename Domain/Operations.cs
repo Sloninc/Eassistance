@@ -7,9 +7,9 @@ namespace Eassistance.Domain
         [Required]
         public string Name { get; set; }
         public List<string> Steps { get; set; }
-        public Guid UnitId { get; set; }
+        public Guid EquipmentId { get; set; }
 
-        [ForeignKey("UnitId")]
-        public Units Unit { get; set; }
+        [ForeignKey("EquipmentId")]
+        public Equipments Equipment { get; set; }
     }
 }
