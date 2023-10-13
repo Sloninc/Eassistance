@@ -7,16 +7,17 @@ namespace Eassistance
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static void Main()
         {
-            var builder = WebApplication.CreateBuilder(args);
+            var builder = WebApplication.CreateBuilder();
 
+     
+            string connection = builder.Configuration.GetConnectionString("DataBase");
             // Add services to the container.
 
             builder.Services.AddControllers().AddNewtonsoftJson();
-            builder.Services.AddDbContext<DataContext>(opt =>
-                opt.UseSqlServer(_configuration.GetConnectionString("DataBase")), ServiceLifetime.Singleton);
-            builder.Services.AddServices();
+            builder.Services.AddDbContext<DataContext>(opt => opt.UseSqlServer(connection), ServiceLifetime.Singleton);
+            //builder.Services.AddServices();
 
             var app = builder.Build();
 

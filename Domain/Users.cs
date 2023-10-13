@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 namespace Eassistance.Domain
 {
-    public class Users
+    public class Users:Base
     {
         [Required]
         public string FirstName { get; set; }

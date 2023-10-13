@@ -4,7 +4,7 @@ namespace Eassistance.Domain
 {
     public class Base
     {
-        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Key]
         public Guid Id { get; set; }
         public DateTime ModifiedOn { get; set; }
     }
