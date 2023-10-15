@@ -1,11 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Telegram.Bot.Types;
 using Telegram.Bot;
+using Telegram.Bot.Types.ReplyMarkups;
+using Telegram.Bot.Types.Enums;
+using Eassistance.Controllers.Commands;
 
 namespace Eassistance.Controllers
 {
     [ApiController]
-    [Route("api/message/update")]
+    [Route("/")]
     public class BotController : ControllerBase
     {
         //private readonly ICommandExecutor _commandExecutor;
@@ -14,29 +17,37 @@ namespace Eassistance.Controllers
         //{
         //    _commandExecutor = commandExecutor;
         //}
+        BaseCommand _command;
+        public BotController(BaseCommand command)
+        {
+            _command= command;
+        }
+        [HttpPost]
+        public async Task<IActionResult> Update(Update update)
+        {
+            // /start => register user
+          
+            //var upd = JsonConvert.DeserializeObject<Update>(update.ToString());
 
-        //[HttpPost]
-        //public async Task<IActionResult> Update([FromBody] object update)
-        //{
-        //    // /start => register user
+            if (update.Message == null && update.CallbackQuery == null)
+            {
+                return Ok();
+            }
 
-        //    var upd = JsonConvert.DeserializeObject<Update>(update.ToString());
+            try
+            {
+                //await _commandExecutor.Execute(update);
+                if (update.Message.Text == "/start")
+                {
+                    await _command.ExecuteAsync(update);
+                }
+            }
+            catch (Exception e)
+            {
+                return Ok();
+            }
 
-        //    if (upd?.Message?.Chat == null && upd?.CallbackQuery == null)
-        //    {
-        //        return Ok();
-        //    }
-
-        //    try
-        //    {
-        //        await _commandExecutor.Execute(upd);
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        return Ok();
-        //    }
-
-        //    return Ok();
+            return Ok();
+        }
     }
-
 }

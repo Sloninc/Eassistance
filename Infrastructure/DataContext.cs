@@ -6,14 +6,12 @@ namespace Eassistance.Infrastructure
     {
         public DataContext(DbContextOptions<DataContext> options) : base(options)
         {
-            //Database.EnsureCreated();
+            Database.EnsureCreated();
         }
-
-        public DbSet<Equipments> Equipments { get; set; }
-        public DbSet<Operations> Operations { get; set; }
-        public DbSet<Units> Units { get; set; }
-        public DbSet<Users> Users { get; set; }
-        public DbSet<Steps> Steps { get; set; }
-
+        public DbSet<Equipment> Equipments { get; set; }
+        public DbSet<Operation> Operations { get; set; }
+        public DbSet<Step> Steps { get; set; }
+        public DbSet<Unit> Units { get; set; }
+        public DbSet<EAUser> Users { get; set; }
     }
 }

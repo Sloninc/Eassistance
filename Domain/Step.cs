@@ -2,14 +2,14 @@
 using System.ComponentModel.DataAnnotations.Schema;
 namespace Eassistance.Domain
 {
-    public class Steps:Base
+    public class Step:Base
     {
         [Required]
         public string Name { get; set; }
         public Guid OperationId { get; set; }
-        public string Step { get; set; }
+        public string Body { get; set; }
 
         [ForeignKey("OperationId")]
-        public Operations Operation { get; set; }
+        public Operation Operation { get; set; }
     }
 }

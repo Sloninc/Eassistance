@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 namespace Eassistance.Domain
 {
-    public class Units:Base
+    public class Unit:Base
     {
         [Required]
         public string Name { get; set; }

@@ -2,14 +2,14 @@
 using System.ComponentModel.DataAnnotations;
 namespace Eassistance.Domain
 {
-    public class Operations:Base
+    public class Equipment:Base
     {
         [Required]
         public string Name { get; set; }
+        public string SerialNumber { get; set; }
+        public Guid UnitId { get; set; }
 
-        public Guid EquipmentId { get; set; }
-
-        [ForeignKey("EquipmentId")]
-        public Equipments Equipment { get; set; }
+        [ForeignKey("UnitId")]
+        public Unit Unit { get; set; }
     }
 }
