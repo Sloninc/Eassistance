@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Eassistance.Services
 {
-    public class StepService:IStepServise
+    public class StepService:IStepService
     {
         private readonly DataContext _context;
 

@@ -4,6 +4,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Eassistance.Infrastructure;
 using Telegram.Bot;
 using Eassistance.Services;
+using Eassistance.BuisnessLogic.FSM;
+using Eassistance.Services.Abstract;
+
 
 namespace Eassistance
 {
@@ -17,6 +20,13 @@ namespace Eassistance
             builder.Services.AddControllers().AddNewtonsoftJson();
             builder.Services.AddSingleton<TelegramBot>();
             builder.Services.AddDbContext<DataContext>(opt => opt.UseSqlServer(builder.Configuration.GetConnectionString("DataBase")));
+            builder.Services.AddTransient<IOperationService, OperationService>();
+            builder.Services.AddTransient<IUserService, UserService>();
+            builder.Services.AddTransient<IUnitService, UnitService>();
+            builder.Services.AddTransient<IStepService, StepService>();
+            builder.Services.AddTransient<IEquipmentService, EquipmentService>();
+            builder.Services.AddTransient<BaseState, StartState>();
+            builder.Services.AddTransient<FSMContext>();
             //builder.Services.AddSingleton<BaseCommand, StartCommand>();
             //builder.Services.AddAuthentication("Bearer").AddJwtBearer();
             //builder.Services.AddAuthorization();

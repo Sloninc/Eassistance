@@ -3,6 +3,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot;
 using Telegram.Bot.Types.ReplyMarkups;
 using Telegram.Bot.Types.Enums;
+using Eassistance.BuisnessLogic.FSM;
 
 namespace Eassistance.Controllers
 {
@@ -16,11 +17,13 @@ namespace Eassistance.Controllers
         //{
         //    _commandExecutor = commandExecutor;
         //}
-        //BaseCommand _command;
-        //public BotController(BaseCommand command)
-        //{
-        //    _command= command;
-        //}
+        FSMContext _fsmContext;
+        BaseState _state;
+        public BotController(BaseState state, FSMContext fsmContext)
+        {
+            _state = state;
+            _fsmContext = fsmContext;
+        }
         [HttpPost]
         public async Task<IActionResult> Update(Update update)
         {
@@ -36,10 +39,7 @@ namespace Eassistance.Controllers
             try
             {
                 //await _commandExecutor.Execute(update);
-                if (update.Message.Text == "/start")
-                {
-                    //await _command.ExecuteAsync(update);
-                }
+                await _fsmContext.Request(update);
             }
             catch (Exception e)
             {

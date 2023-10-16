@@ -1,29 +1,35 @@
-﻿namespace Eassistance.BuisnessLogic.FSM
+﻿using Eassistance.Infrastructure;
+using Eassistance.Domain;
+using Microsoft.EntityFrameworkCore;
+using Telegram.Bot.Types;
+using Telegram.Bot;
+
+namespace Eassistance.BuisnessLogic.FSM
 {
     public class FSMContext
     {
-        //// Ссылка на текущее состояние Контекста.
-        //private BaseState _state = null;
+        // Ссылка на текущее состояние Контекста.
+        private BaseState _state = null;
 
-        //public FSMContext(BaseState state)
-        //{
-        //    this.TransitionTo(state);
-        //}
+        public FSMContext(BaseState state)
+        {
+            TransitionTo(state);
+        }
 
-        //// Контекст позволяет изменять объект Состояния во время выполнения.
-        //public void TransitionTo(BaseState state)
-        //{
-        //    Console.WriteLine($"Context: Transition to {state.GetType().Name}.");
-        //    this._state = state;
-        //    this._state.SetContext(this);
-        //}
+        // Контекст позволяет изменять объект Состояния во время выполнения.
+        public void TransitionTo(BaseState state)
+        {
+            //Console.WriteLine($"Context: Transition to {state.GetType().Name}.");
+            _state = state;
+            _state.SetContext(this);
+        }
 
-        //// Контекст делегирует часть своего поведения текущему объекту
-        //// Состояния.
-        //public void Request1()
-        //{
-        //    this._state.Handle1();
-        //}
+        // Контекст делегирует часть своего поведения текущему объекту
+        // Состояния.
+        public async Task Request(Update update)
+        {
+            await _state.Handle(update);
+        }
 
         //public void Request2()
         //{
