@@ -10,22 +10,29 @@ namespace Eassistance.BuisnessLogic.FSM
 {
     public abstract class BaseState
     {
+        protected readonly IDbContextFactory<DataContext> _contextFactory;
         protected FSMContext _fsmcontext;
-        protected readonly DataContext _context;
         protected readonly IUserService _userService;
         protected readonly TelegramBot _botClient;
-        public BaseState(DataContext context, IUserService userService, TelegramBot telegramBot)
+        protected readonly IUnitService _unitService;
+        protected readonly IOperationService _operationService;
+        protected readonly IEquipmentService _equipmentService;
+        protected readonly IStepService _stepService;
+        public BaseState(IDbContextFactory<DataContext> contextFactory, IUserService userService, TelegramBot telegramBot, IUnitService unitService, IOperationService operationService, IEquipmentService equipmentService, IStepService stepService)
         {
-            _context = context;
+            _contextFactory = contextFactory;
             _userService = userService;
             _botClient = telegramBot; ;
+            _unitService = unitService;
+            _operationService = operationService;
+            _equipmentService = equipmentService;
+            _stepService = stepService;
         }
         public void SetContext(FSMContext fsmcontext)
         {
             _fsmcontext = fsmcontext;
         }
         public abstract string Name { get; }
-        //public abstract Task ExecuteAsync(Update update);
         public abstract Task Handle(Update update);
     }
 }

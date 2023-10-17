@@ -10,7 +10,7 @@ namespace Eassistance.BuisnessLogic.FSM
     {
         // Ссылка на текущее состояние Контекста.
         private BaseState _state = null;
-
+        //public List<BaseState> _states = new List<BaseState>();
         public FSMContext(BaseState state)
         {
             TransitionTo(state);
@@ -20,6 +20,8 @@ namespace Eassistance.BuisnessLogic.FSM
         public void TransitionTo(BaseState state)
         {
             //Console.WriteLine($"Context: Transition to {state.GetType().Name}.");
+            //if(_state!=null)
+            //    _states.Add(_state);
             _state = state;
             _state.SetContext(this);
         }

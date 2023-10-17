@@ -10,11 +10,11 @@ namespace Eassistance.Services
 {
     public class UserService : IUserService
     {
-        private readonly DataContext _context;
+        protected readonly IDbContextFactory<DataContext> _contextFactory;
 
-        public UserService(DataContext context)
+        public UserService(IDbContextFactory<DataContext> contextFactory)
         {
-            _context = context;
+            _contextFactory = contextFactory;
         }
 
         public async Task<EAUser> GetOrCreate(Update update)
@@ -36,15 +36,15 @@ namespace Eassistance.Services
                     LastName = update.Message.Chat.LastName
                 }
             };
-
-            var user = await _context.Users.FirstOrDefaultAsync(x => x.ChatId == newUser.ChatId);
-
-            if (user != null) return user;
-
-            var result = await _context.Users.AddAsync(newUser);
-            await _context.SaveChangesAsync();
-
-            return result.Entity;
+            EAUser user = null;
+            using (var _context = _contextFactory.CreateDbContext())
+            {
+                user = await _context.Users.FirstOrDefaultAsync(x => x.ChatId == newUser.ChatId);
+                if (user != null) return user;
+                var result = await _context.Users.AddAsync(newUser);
+                await _context.SaveChangesAsync();
+                return result.Entity;
+            }
         }
     }
 }

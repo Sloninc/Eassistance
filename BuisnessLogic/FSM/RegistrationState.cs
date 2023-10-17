@@ -10,12 +10,12 @@ namespace Eassistance.BuisnessLogic.FSM
 {
     public class RegistrationState:BaseState
     {
-        public RegistrationState(DataContext context, IUserService userService, TelegramBot telegramBot) : base(context, userService, telegramBot)
+
+        public RegistrationState(IDbContextFactory<DataContext> contextFactory, IUserService userService, TelegramBot telegramBot, IUnitService unitService, IOperationService operationService, IEquipmentService equipmentService, IStepService stepService) : base(contextFactory, userService, telegramBot, unitService, operationService, equipmentService, stepService)
         {
             Name = "registration";
         }
         public override string Name { get; }
-        //public abstract Task ExecuteAsync(Update update);
         public async override Task Handle(Update update)
         {
             try
@@ -27,9 +27,7 @@ namespace Eassistance.BuisnessLogic.FSM
                         await _botClient.GetBot().Result.SendTextMessageAsync(update.Message.Chat.Id, message);
                         break;
                     default:
-                        if (update.Message.Text == null)
-                            await _botClient.GetBot().Result.SendTextMessageAsync(update.Message.Chat.Id, "вы ничего не ввели");
-                        else if (update.Message.Text.Split(' ').Count() != 2)
+                        if (update.Message.Text.Split(' ').Count() != 2)
                             await _botClient.GetBot().Result.SendTextMessageAsync(update.Message.Chat.Id, "Введите имя и фамилию через пробел!");
                         else
                         {
@@ -40,10 +38,13 @@ namespace Eassistance.BuisnessLogic.FSM
                                 FirstName = update.Message.Text.Split(' ')[0],
                                 LastName = update.Message.Text.Split(' ')[1]
                             };
-                            await _context.Users.AddAsync(user);
-                            await _context.SaveChangesAsync();
-                            await _botClient.GetBot().Result.SendTextMessageAsync(update.Message.Chat.Id, $"{update.Message.Text} зарегистрирован");
-                            //_fsmcontext.TransitionTo(new RegistrationState(_context, _userService, _botClient));
+                            using(var _context = _contextFactory.CreateDbContext())
+                            {
+                                await _context.Users.AddAsync(user);
+                                await _context.SaveChangesAsync();
+                                await _botClient.GetBot().Result.SendTextMessageAsync(update.Message.Chat.Id, $"{update.Message.Text} зарегистрирован");
+                                //_fsmcontext.TransitionTo(new RegistrationState(_context, _userService, _botClient));
+                            }
                         }
                         break;
                 }

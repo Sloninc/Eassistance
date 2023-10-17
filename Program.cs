@@ -17,16 +17,20 @@ namespace Eassistance
             var builder = WebApplication.CreateBuilder();
 
             // Add services to the container.
+            
             builder.Services.AddControllers().AddNewtonsoftJson();
             builder.Services.AddSingleton<TelegramBot>();
-            builder.Services.AddDbContext<DataContext>(opt => opt.UseSqlServer(builder.Configuration.GetConnectionString("DataBase")));
+            builder.Services.AddDbContextFactory<DataContext>(opt => opt.UseSqlServer(builder.Configuration.GetConnectionString("DataBase")));
             builder.Services.AddTransient<IOperationService, OperationService>();
-            builder.Services.AddTransient<IUserService, UserService>();
             builder.Services.AddTransient<IUnitService, UnitService>();
             builder.Services.AddTransient<IStepService, StepService>();
             builder.Services.AddTransient<IEquipmentService, EquipmentService>();
-            builder.Services.AddTransient<BaseState, StartState>();
-            builder.Services.AddTransient<FSMContext>();
+
+            builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<BaseState, StartState>();
+            //builder.Services.AddScoped<RegistrationState>();
+            //builder.Services.AddScoped<Func<RegistrationState>>();
+            builder.Services.AddScoped<FSMContext>();
             //builder.Services.AddSingleton<BaseCommand, StartCommand>();
             //builder.Services.AddAuthentication("Bearer").AddJwtBearer();
             //builder.Services.AddAuthorization();

@@ -12,23 +12,26 @@ namespace Eassistance.BuisnessLogic.FSM
 {
     public class StartState : BaseState
     {
-        public StartState(DataContext context, IUserService userService, TelegramBot telegramBot) : base(context, userService, telegramBot)
+        public StartState(IDbContextFactory<DataContext> contextFactory, IUserService userService, TelegramBot telegramBot, IUnitService unitService, IOperationService operationService, IEquipmentService equipmentService, IStepService stepService) : base(contextFactory, userService, telegramBot, unitService, operationService, equipmentService, stepService)
         {
             Name = "start";
         }
         public override string Name { get; }
-        //public abstract Task ExecuteAsync(Update update);
         public async override Task Handle(Update update)
         {
-            //var user = await _userService.GetOrCreate(update);
-            var user = await _context.Users.FirstOrDefaultAsync(x => x.ChatId == update.Message.Chat.Id);
+            EAUser user = null;
+            using (var _context = _contextFactory.CreateDbContext())
+            {
+                user = await _context.Users.FirstOrDefaultAsync(x => x.ChatId == update.Message.Chat.Id);
+            }
             if (user == null)
             {
-                _fsmcontext.TransitionTo(new RegistrationState(_context, _userService, _botClient));
+                _fsmcontext.TransitionTo(new RegistrationState(_contextFactory, _userService, _botClient, _unitService,_operationService,_equipmentService,_stepService));
                 _fsmcontext.Request(update);
             }
             else
             {
+                //_fsmcontext.TransitionTo(new RegistrationState(_context, _userService, _botClient));
                 var inlineKeyboard = new ReplyKeyboardMarkup(new[]
              {
                 new[]
