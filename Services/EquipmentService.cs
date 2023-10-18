@@ -9,37 +9,48 @@ namespace Eassistance.Services
 {
     public class EquipmentService:IEquipmentService
     {
-        private readonly DataContext _context;
+        protected readonly IDbContextFactory<DataContext> _contextFactory;
 
-        public EquipmentService(DataContext context)
+        public EquipmentService(IDbContextFactory<DataContext> contextFactory)
         {
-            _context = context;
+            _contextFactory = contextFactory;
         }
         public async Task<bool> CreateEquipment(Equipment equipment)
         {
-            await _context.Equipments.AddAsync(equipment);
-            await _context.SaveChangesAsync();
+            using (var _context = _contextFactory.CreateDbContext())
+            {
+                await _context.Equipments.AddAsync(equipment);
+                await _context.SaveChangesAsync();
+            }
             return true;
         }
         public async Task<bool> DeleteEquipment(Equipment equipment)
         {
             if (equipment != null)
             {
-                _context.Equipments.Remove(equipment);
-                await _context.SaveChangesAsync();
-                return true;
+                using (var _context = _contextFactory.CreateDbContext())
+                {
+                    _context.Equipments.Remove(equipment);
+                    await _context.SaveChangesAsync();
+                }
             }
             return false;
         }
         public async Task<List<Equipment>> GetAllEquipments(Unit unit)
         {
-            return await _context.Equipments
+            using (var _context = _contextFactory.CreateDbContext())
+            {
+                return await _context.Equipments
                 .Where(x => x.UnitId == unit.Id)
                 .ToListAsync();
+            }
         }
-        public async Task<Equipment> GetEquipmentById(Guid id)
+        public async Task<Equipment> GetEquipmentByName(string name)
         {
-            return await _context.Equipments.FirstOrDefaultAsync(x => x.Id == id);
+            using (var _context = _contextFactory.CreateDbContext())
+            {
+                return await _context.Equipments.FirstOrDefaultAsync(x => x.Name == name);
+            }
         }
     }
 }

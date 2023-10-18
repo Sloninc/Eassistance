@@ -9,35 +9,47 @@ namespace Eassistance.Services
 {
     public class UnitService:IUnitService
     {
-        private readonly DataContext _context;
+        protected readonly IDbContextFactory<DataContext> _contextFactory;
 
-        public UnitService(DataContext context)
+        public UnitService(IDbContextFactory<DataContext> contextFactory)
         {
-            _context = context;
+            _contextFactory = contextFactory;
         }
         public async Task<bool> CreateUnit(Unit unit)
         {
-            await _context.Units.AddAsync(unit);
-            await _context.SaveChangesAsync();
+            using (var _context = _contextFactory.CreateDbContext())
+            {
+                await _context.Units.AddAsync(unit);
+                await _context.SaveChangesAsync();
+            }
             return true;
         }
         public async Task<bool> DeleteUnit(Unit unit)
         {
             if (unit != null)
             {
-                _context.Units.Remove(unit);
-                await _context.SaveChangesAsync();
+                using (var _context = _contextFactory.CreateDbContext())
+                {
+                    _context.Units.Remove(unit);
+                    await _context.SaveChangesAsync();
+                }
                 return true;
             }
             return false;
         }
         public async Task<List<Unit>> GetAllUnits()
         {
-            return await _context.Units.ToListAsync();
+            using (var _context = _contextFactory.CreateDbContext())
+            {
+                return await _context.Units.ToListAsync();
+            }
         }
-        public async Task<Unit> GetUnitById(Guid id)
+        public async Task<Unit> GetUnitByName(string name)
         {
-            return await _context.Units.FirstOrDefaultAsync(x => x.Id == id);
+            using (var _context = _contextFactory.CreateDbContext())
+            {
+                return await _context.Units.FirstOrDefaultAsync(x => x.Name == name);
+            }
         }
     }
 }

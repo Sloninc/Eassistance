@@ -2,6 +2,8 @@
 using Eassistance.Domain;
 using Microsoft.EntityFrameworkCore;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.ReplyMarkups;
 using Eassistance.Services;
 using Eassistance.Services.Abstract;
 using Telegram.Bot;
@@ -38,13 +40,22 @@ namespace Eassistance.BuisnessLogic.FSM
                                 FirstName = update.Message.Text.Split(' ')[0],
                                 LastName = update.Message.Text.Split(' ')[1]
                             };
-                            using(var _context = _contextFactory.CreateDbContext())
+                            using (var _context = _contextFactory.CreateDbContext())
                             {
                                 await _context.Users.AddAsync(user);
                                 await _context.SaveChangesAsync();
-                                await _botClient.GetBot().Result.SendTextMessageAsync(update.Message.Chat.Id, $"{update.Message.Text} зарегистрирован");
-                                //_fsmcontext.TransitionTo(new RegistrationState(_context, _userService, _botClient));
                             }
+                            var inlineKeyboard = new ReplyKeyboardMarkup(new[]
+                            {
+                            new[]
+                                {
+                                    new KeyboardButton("OK")
+                                }
+                            });
+                            inlineKeyboard.ResizeKeyboard = true;
+                            await _botClient.GetBot().Result.SendTextMessageAsync(update.Message.Chat.Id, $"{update.Message.Text} зарегистрирован", replyMarkup: inlineKeyboard);
+                            _fsmcontext.TransitionTo(new StartState(_contextFactory, _userService, _botClient, _unitService, _operationService, _equipmentService, _stepService));
+                            FSMContextStorage.Set(update.Message.Chat.Id, _fsmcontext);
                         }
                         break;
                 }
@@ -53,7 +64,6 @@ namespace Eassistance.BuisnessLogic.FSM
             {
                 Console.WriteLine(ex.Message);
             }
-
         }
     }
 }

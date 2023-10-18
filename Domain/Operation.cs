@@ -6,10 +6,8 @@ namespace Eassistance.Domain
     {
         [Required]
         public string Name { get; set; }
-
-        public Guid EquipmentId { get; set; }
-
         [ForeignKey("EquipmentId")]
+        public Guid EquipmentId { get; set; }
         public Equipment Equipment { get; set; }
     }
 }

@@ -27,22 +27,24 @@ namespace Eassistance.BuisnessLogic.FSM
             if (user == null)
             {
                 _fsmcontext.TransitionTo(new RegistrationState(_contextFactory, _userService, _botClient, _unitService,_operationService,_equipmentService,_stepService));
+                FSMContextStorage.Set(update.Message.Chat.Id, _fsmcontext);
                 _fsmcontext.Request(update);
             }
             else
             {
-                //_fsmcontext.TransitionTo(new RegistrationState(_context, _userService, _botClient));
+                _fsmcontext.TransitionTo(new UnitState(_contextFactory, _userService, _botClient, _unitService, _operationService, _equipmentService, _stepService));
+                FSMContextStorage.Set(update.Message.Chat.Id, _fsmcontext);
                 var inlineKeyboard = new ReplyKeyboardMarkup(new[]
-             {
+                {
                 new[]
                     {
                     new KeyboardButton("Список узлов"),
                     new KeyboardButton("Добавить узел"),
                     new KeyboardButton("Удалить узел")
                     }
-            });
+                });
                 inlineKeyboard.ResizeKeyboard = true;
-                await _botClient.GetBot().Result.SendTextMessageAsync(user.ChatId, "Добро пожаловать! Выберите команду! ", replyMarkup: inlineKeyboard);
+                await _botClient.GetBot().Result.SendTextMessageAsync(user.ChatId, "Выберите действие", replyMarkup: inlineKeyboard);
             }
         }
     }

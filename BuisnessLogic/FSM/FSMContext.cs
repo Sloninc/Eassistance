@@ -9,33 +9,24 @@ namespace Eassistance.BuisnessLogic.FSM
     public class FSMContext
     {
         // Ссылка на текущее состояние Контекста.
-        private BaseState _state = null;
-        //public List<BaseState> _states = new List<BaseState>();
+        private BaseState _state;
+        
         public FSMContext(BaseState state)
         {
+            _state = state;
             TransitionTo(state);
         }
-
         // Контекст позволяет изменять объект Состояния во время выполнения.
         public void TransitionTo(BaseState state)
         {
-            //Console.WriteLine($"Context: Transition to {state.GetType().Name}.");
-            //if(_state!=null)
-            //    _states.Add(_state);
             _state = state;
             _state.SetContext(this);
         }
-
         // Контекст делегирует часть своего поведения текущему объекту
         // Состояния.
         public async Task Request(Update update)
         {
             await _state.Handle(update);
         }
-
-        //public void Request2()
-        //{
-        //    this._state.Handle2();
-        //}
     }
 }

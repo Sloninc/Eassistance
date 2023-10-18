@@ -12,10 +12,8 @@ namespace Eassistance.Controllers
     public class BotController : ControllerBase
     {
         FSMContext _fsmContext;
-        BaseState _state;
         public BotController(BaseState state, FSMContext fsmContext)
         {
-            _state = state;
             _fsmContext = fsmContext;
         }
         [HttpPost]
@@ -27,7 +25,10 @@ namespace Eassistance.Controllers
             }
             try
             {
-                await _fsmContext.Request(update);
+                var context = FSMContextStorage.Get(update.Message.Chat.Id);
+                if(context == null)
+                    context = _fsmContext;
+                await context.Request(update);
             }
             catch (Exception e)
             {

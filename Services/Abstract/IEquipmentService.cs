@@ -5,7 +5,7 @@ namespace Eassistance.Services.Abstract
     {
         Task<List<Equipment>> GetAllEquipments(Unit unit);
         Task<bool> CreateEquipment(Equipment equipment);
-        Task<Equipment> GetEquipmentById(Guid id);
+        Task<Equipment> GetEquipmentByName(string name);
         Task<bool> DeleteEquipment(Equipment equipment);
     }
 }

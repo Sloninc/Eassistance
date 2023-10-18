@@ -6,10 +6,9 @@ namespace Eassistance.Domain
     {
         [Required]
         public string Name { get; set; }
+        [ForeignKey("OperationId")]
         public Guid OperationId { get; set; }
         public string Body { get; set; }
-
-        [ForeignKey("OperationId")]
         public Operation Operation { get; set; }
     }
 }

@@ -5,7 +5,7 @@ namespace Eassistance.Services.Abstract
     {
         Task<List<Unit>> GetAllUnits();
         Task<bool> DeleteUnit(Unit unit);
-        Task<Unit> GetUnitById(Guid id);
+        Task<Unit> GetUnitByName(string name);
         Task<bool> CreateUnit(Unit unit);
     }
 }

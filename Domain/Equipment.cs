@@ -7,9 +7,8 @@ namespace Eassistance.Domain
         [Required]
         public string Name { get; set; }
         public string SerialNumber { get; set; }
-        public Guid UnitId { get; set; }
-
         [ForeignKey("UnitId")]
+        public Guid UnitId { get; set; }
         public Unit Unit { get; set; }
     }
 }

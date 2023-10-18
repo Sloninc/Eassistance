@@ -33,6 +33,7 @@ namespace Eassistance.BuisnessLogic.FSM
             _fsmcontext = fsmcontext;
         }
         public abstract string Name { get; }
+        public FSMContext fSM { get; }
         public abstract Task Handle(Update update);
     }
 }
