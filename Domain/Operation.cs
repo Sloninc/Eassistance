@@ -2,12 +2,12 @@
 using System.ComponentModel.DataAnnotations;
 namespace Eassistance.Domain
 {
-    public class Operation:Base
+    public class Operation : Base
     {
         [Required]
         public string Name { get; set; }
-        [ForeignKey("EquipmentId")]
         public Guid EquipmentId { get; set; }
+        [ForeignKey("EquipmentId")]
         public Equipment Equipment { get; set; }
     }
 }
