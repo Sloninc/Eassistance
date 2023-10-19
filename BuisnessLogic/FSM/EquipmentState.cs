@@ -78,7 +78,7 @@ namespace Eassistance.BuisnessLogic.FSM
                         if (_isOperationCreate)
                         {
                             string[] newEqipment = update.Message.Text.Split('@');
-                            _addedEquipment = new Equipment { Name = newEqipment[0], SerialNumber = newEqipment[1], Unit = _unit };
+                            _addedEquipment = new Equipment { Name = newEqipment[0], SerialNumber = newEqipment[1], UnitId = _unit.Id };
                             _isAddEquipment = await _equipmentService.CreateEquipment(_addedEquipment);
                             var inlineKeyboard = new ReplyKeyboardMarkup(new[] { new[] { new KeyboardButton("OK") } });
                             if (_isAddEquipment)
