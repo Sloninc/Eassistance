@@ -15,10 +15,10 @@ namespace Eassistance.BuisnessLogic.FSM
         public EquipmentState(IDbContextFactory<DataContext> contextFactory, IUserService userService, TelegramBot telegramBot, IUnitService unitService, IOperationService operationService, IEquipmentService equipmentService, IStepService stepService, Unit unit) : base(contextFactory, userService, telegramBot, unitService, operationService, equipmentService, stepService)
         {
             Name = "Equipments";
-            Unit = unit;
+            _unit = unit;
         }
         public override string Name { get; }
-        public Unit Unit { get; }
+        private Unit _unit;
 
         bool _isAddEquipment = false;
         List<Equipment> _equipments = null;
@@ -39,14 +39,14 @@ namespace Eassistance.BuisnessLogic.FSM
                         _fsmcontext.Request(update);
                         break;
                     case "Список оборудования":
-                        _equipments = await _equipmentService.GetAllEquipments(Unit);
+                        _equipments = await _equipmentService.GetAllEquipments(_unit);
                         if (_equipments.Count == 0)
                         {
                             var inlineKeyboard = new ReplyKeyboardMarkup(new[] { new[] { new KeyboardButton("OK") } });
                             inlineKeyboard.ResizeKeyboard = false;
                             _fsmcontext.TransitionTo(new EquipmentChoiceState(_contextFactory, _userService, _botClient, _unitService, _operationService, _equipmentService, _stepService));
                             FSMContextStorage.Set(update.Message.Chat.Id, _fsmcontext);
-                            await _botClient.GetBot().Result.SendTextMessageAsync(update.Message.Chat.Id, $"список оборудования узла {Unit.Name} пуст", replyMarkup: inlineKeyboard);;
+                            await _botClient.GetBot().Result.SendTextMessageAsync(update.Message.Chat.Id, $"список оборудования узла {_unit.Name} пуст", replyMarkup: inlineKeyboard);;
                         }
                         else
                         {
@@ -66,7 +66,7 @@ namespace Eassistance.BuisnessLogic.FSM
                         break;
                     case "Удалить оборудование":
                         _isOperationDelete = true;
-                        _equipments = await _equipmentService.GetAllEquipments(Unit);
+                        _equipments = await _equipmentService.GetAllEquipments(_unit);
                         KeyboardButton[][] keyboardButtonsDelete = new KeyboardButton[_equipments.Count][];
                         for (int i = 0; i < _equipments.Count; i++)
                             keyboardButtonsDelete[i] = new KeyboardButton[1] { new KeyboardButton(_equipments[i].Name) };
@@ -78,7 +78,7 @@ namespace Eassistance.BuisnessLogic.FSM
                         if (_isOperationCreate)
                         {
                             string[] newEqipment = update.Message.Text.Split('@');
-                            _addedEquipment = new Equipment { Name = newEqipment[0], SerialNumber = newEqipment[1], Unit = Unit, UnitId = Unit.Id };
+                            _addedEquipment = new Equipment { Name = newEqipment[0], SerialNumber = newEqipment[1], Unit = _unit };
                             _isAddEquipment = await _equipmentService.CreateEquipment(_addedEquipment);
                             var inlineKeyboard = new ReplyKeyboardMarkup(new[] { new[] { new KeyboardButton("OK") } });
                             if (_isAddEquipment)
