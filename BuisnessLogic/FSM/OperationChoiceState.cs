@@ -10,11 +10,13 @@ using Telegram.Bot;
 
 namespace Eassistance.BuisnessLogic.FSM
 {
-    public class OperationChoiceState:BaseState
+    public class OperationChoiceState : BaseState
     {
-        public OperationChoiceState(IDbContextFactory<DataContext> contextFactory, IUserService userService, TelegramBot telegramBot, IUnitService unitService, IOperationService operationService, IEquipmentService equipmentService, IStepService stepService) : base(contextFactory, userService, telegramBot, unitService, operationService, equipmentService, stepService)
+        Equipment _currentEquipment;
+        public OperationChoiceState(IDbContextFactory<DataContext> contextFactory, IUserService userService, TelegramBot telegramBot, IUnitService unitService, IOperationService operationService, IEquipmentService equipmentService, IStepService stepService, Equipment currentEquipment = null) : base(contextFactory, userService, telegramBot, unitService, operationService, equipmentService, stepService)
         {
-            Name = "EqipmentChoice";
+            Name = "OperationChoice";
+            _currentEquipment = currentEquipment;
         }
         public override string Name { get; }
 
@@ -22,13 +24,21 @@ namespace Eassistance.BuisnessLogic.FSM
         {
             try
             {
-                switch (update.Message.Text)
+                Equipment equipment = null;
+                var inlineKeyboard = GetTrheeKeyboard("Список операций", "Добавить операцию", "Удалить операцию");
+                if (update.Message.Text == "OK")
                 {
-                    case "/start":
-                        _fsmcontext.TransitionTo(new StartState(_contextFactory, _userService, _botClient, _unitService, _operationService, _equipmentService, _stepService));
-                        FSMContextStorage.Set(update.Message.Chat.Id, _fsmcontext);
-                        _fsmcontext.Request(update);
-                        break;
+                    equipment = _currentEquipment;
+                    _fsmcontext.TransitionTo(new OperationState(_contextFactory, _userService, _botClient, _unitService, _operationService, _equipmentService, _stepService, equipment));
+                    FSMContextStorage.Set(update.Message.Chat.Id, _fsmcontext);
+                    await _botClient.GetBot().Result.SendTextMessageAsync(update.Message.Chat.Id, $"Оборудование {equipment.Name}", replyMarkup: inlineKeyboard);
+                }
+                else
+                {
+                    equipment = await _equipmentService.GetEquipmentByName(update.Message.Text);
+                    _fsmcontext.TransitionTo(new OperationState(_contextFactory, _userService, _botClient, _unitService, _operationService, _equipmentService, _stepService, equipment));
+                    FSMContextStorage.Set(update.Message.Chat.Id, _fsmcontext);
+                    await _botClient.GetBot().Result.SendTextMessageAsync(update.Message.Chat.Id, $"оборудование {equipment.Name}", replyMarkup: inlineKeyboard);
                 }
             }
             catch (Exception ex)

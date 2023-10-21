@@ -40,6 +40,8 @@ namespace Eassistance.BuisnessLogic.FSM
                                 FirstName = update.Message.Text.Split(' ')[0],
                                 LastName = update.Message.Text.Split(' ')[1]
                             };
+                            if (user.Username == null)
+                                user.Username = user.FirstName;
                             using (var _context = _contextFactory.CreateDbContext())
                             {
                                 await _context.Users.AddAsync(user);

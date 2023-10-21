@@ -33,8 +33,10 @@ namespace Eassistance.Services
                     _context.Equipments.Remove(equipment);
                     await _context.SaveChangesAsync();
                 }
+                return true;
             }
-            return false;
+            else
+                return false;
         }
         public async Task<List<Equipment>> GetAllEquipments(Unit unit)
         {

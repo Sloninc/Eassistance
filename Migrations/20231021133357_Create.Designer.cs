@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Eassistance.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20231019081743_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20231021133357_Create")]
+    partial class Create
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -123,6 +123,9 @@ namespace Eassistance.Migrations
 
                     b.Property<Guid>("OperationId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("SerialNumber")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 

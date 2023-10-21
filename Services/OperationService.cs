@@ -9,37 +9,50 @@ namespace Eassistance.Services
 {
     public class OperationService : IOperationService
     {
-        private readonly DataContext _context;
+        protected readonly IDbContextFactory<DataContext> _contextFactory;
 
-        public OperationService(DataContext context)
+        public OperationService(IDbContextFactory<DataContext> contextFactory)
         {
-            _context = context;
+            _contextFactory = contextFactory;
         }
         public async Task<bool> CreateOperation(Operation operation)
         {
-            await _context.Operations.AddAsync(operation);
-            await _context.SaveChangesAsync();
+            using (var _context = _contextFactory.CreateDbContext())
+            {
+                await _context.Operations.AddAsync(operation);
+                await _context.SaveChangesAsync();
+            }
             return true;
         }
         public async Task<bool> DeleteOperation(Operation operation)
         {
             if (operation != null)
             {
-                _context.Operations.Remove(operation);
-                await _context.SaveChangesAsync();
+                using (var _context = _contextFactory.CreateDbContext())
+                {
+                    _context.Operations.Remove(operation);
+                    await _context.SaveChangesAsync();
+                }
                 return true;
             }
-            return false;
+            else
+                return false;
         }
         public async Task<List<Operation>> GetAllOperations(Equipment equipment)
         {
-            return await _context.Operations
+            using (var _context = _contextFactory.CreateDbContext())
+            {
+                return await _context.Operations
                 .Where(x => x.EquipmentId == equipment.Id)
                 .ToListAsync();
+            }
         }
-        public async Task<Operation> GetOperationById(Guid id)
+        public async Task<Operation> GetOperationByName(string name)
         {
-            return await _context.Operations.FirstOrDefaultAsync(x => x.Id == id);
+            using (var _context = _contextFactory.CreateDbContext())
+            {
+                return await _context.Operations.FirstOrDefaultAsync(x => x.Name == name);
+            }
         }
     }
 }

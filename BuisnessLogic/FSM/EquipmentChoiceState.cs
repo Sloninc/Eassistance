@@ -12,9 +12,11 @@ namespace Eassistance.BuisnessLogic.FSM
 {
     public class EquipmentChoiceState:BaseState
     {
-        public EquipmentChoiceState(IDbContextFactory<DataContext> contextFactory, IUserService userService, TelegramBot telegramBot, IUnitService unitService, IOperationService operationService, IEquipmentService equipmentService, IStepService stepService) : base(contextFactory, userService, telegramBot, unitService, operationService, equipmentService, stepService)
+        Unit _currentUnit;
+        public EquipmentChoiceState(IDbContextFactory<DataContext> contextFactory, IUserService userService, TelegramBot telegramBot, IUnitService unitService, IOperationService operationService, IEquipmentService equipmentService, IStepService stepService, Unit currentunit=null) : base(contextFactory, userService, telegramBot, unitService, operationService, equipmentService, stepService)
         {
             Name = "EqipmentChoice";
+            _currentUnit = currentunit;
         }
         public override string Name { get; }
  
@@ -22,29 +24,21 @@ namespace Eassistance.BuisnessLogic.FSM
         {
             try
             {
-
                 Unit unit = null;
-                using (var _context = _contextFactory.CreateDbContext())
+                var inlineKeyboard = GetTrheeKeyboard("Список оборудования", "Добавить оборудование", "Удалить оборудование");
+                if (update.Message.Text == "OK")
                 {
-                    unit = await _context.Units.FirstOrDefaultAsync(x => x.Name == update.Message.Text);
-                }
-                if (unit == null)
-                {
-                    _fsmcontext.TransitionTo(new UnitState(_contextFactory, _userService, _botClient, _unitService, _operationService, _equipmentService, _stepService));
+                    unit = _currentUnit;
+                    _fsmcontext.TransitionTo(new EquipmentState(_contextFactory, _userService, _botClient, _unitService, _operationService, _equipmentService, _stepService, unit));
                     FSMContextStorage.Set(update.Message.Chat.Id, _fsmcontext);
-                    _fsmcontext.Request(update);
+                    await _botClient.GetBot().Result.SendTextMessageAsync(update.Message.Chat.Id, $"Узел связи {unit.Name}", replyMarkup: inlineKeyboard);
                 }
                 else
                 {
+                    unit = await _unitService.GetUnitByName(update.Message.Text);
                     _fsmcontext.TransitionTo(new EquipmentState(_contextFactory, _userService, _botClient, _unitService, _operationService, _equipmentService, _stepService, unit));
                     FSMContextStorage.Set(update.Message.Chat.Id, _fsmcontext);
-                    KeyboardButton[][] keyboardButtons = new KeyboardButton[3][];
-                    keyboardButtons[0] = new KeyboardButton[1] { new KeyboardButton($"Список оборудования") };
-                    keyboardButtons[1] = new KeyboardButton[1] { new KeyboardButton($"Добавить оборудование") };
-                    keyboardButtons[2] = new KeyboardButton[1] { new KeyboardButton($"Удалить оборудования") };
-                    var inlineKeyboard = new ReplyKeyboardMarkup(keyboardButtons);
-                    inlineKeyboard.ResizeKeyboard = true;
-                    await _botClient.GetBot().Result.SendTextMessageAsync(update.Message.Chat.Id, $"Узел связи {unit.Name}", replyMarkup: inlineKeyboard);;
+                    await _botClient.GetBot().Result.SendTextMessageAsync(update.Message.Chat.Id, $"Узел связи {unit.Name}", replyMarkup: inlineKeyboard);
                 }
             }
             catch (Exception ex)
@@ -52,5 +46,6 @@ namespace Eassistance.BuisnessLogic.FSM
                 Console.WriteLine(ex.Message);
             }
         }
+
     }
 }

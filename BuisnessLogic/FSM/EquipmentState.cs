@@ -44,7 +44,7 @@ namespace Eassistance.BuisnessLogic.FSM
                         {
                             var inlineKeyboard = new ReplyKeyboardMarkup(new[] { new[] { new KeyboardButton("OK") } });
                             inlineKeyboard.ResizeKeyboard = false;
-                            _fsmcontext.TransitionTo(new EquipmentChoiceState(_contextFactory, _userService, _botClient, _unitService, _operationService, _equipmentService, _stepService));
+                            _fsmcontext.TransitionTo(new EquipmentChoiceState(_contextFactory, _userService, _botClient, _unitService, _operationService, _equipmentService, _stepService, _unit));
                             FSMContextStorage.Set(update.Message.Chat.Id, _fsmcontext);
                             await _botClient.GetBot().Result.SendTextMessageAsync(update.Message.Chat.Id, $"список оборудования узла {_unit.Name} пуст", replyMarkup: inlineKeyboard);;
                         }
@@ -62,17 +62,32 @@ namespace Eassistance.BuisnessLogic.FSM
                         break;
                     case "Добавить оборудование":
                         _isOperationCreate = true;
+                        _fsmcontext.TransitionTo(this);
+                        FSMContextStorage.Set(update.Message.Chat.Id, _fsmcontext);
                         await _botClient.GetBot().Result.SendTextMessageAsync(update.Message.Chat.Id, "Введите название оборудования и через @ его заводской номер. Например \"DW7000@34FV67CBV67B\"");
                         break;
                     case "Удалить оборудование":
                         _isOperationDelete = true;
                         _equipments = await _equipmentService.GetAllEquipments(_unit);
-                        KeyboardButton[][] keyboardButtonsDelete = new KeyboardButton[_equipments.Count][];
-                        for (int i = 0; i < _equipments.Count; i++)
-                            keyboardButtonsDelete[i] = new KeyboardButton[1] { new KeyboardButton(_equipments[i].Name) };
-                        var inlineKeyboardDelete = new ReplyKeyboardMarkup(keyboardButtonsDelete);
-                        const string messageDelete = "Выберите оборудование из списка для удаления";
-                        await _botClient.GetBot().Result.SendTextMessageAsync(update.Message.Chat.Id, messageDelete, replyMarkup: inlineKeyboardDelete);
+                        if (_equipments.Count == 0)
+                        {
+                            var inlineKeyboard = new ReplyKeyboardMarkup(new[] { new[] { new KeyboardButton("OK") } });
+                            inlineKeyboard.ResizeKeyboard = false;
+                            _fsmcontext.TransitionTo(new EquipmentChoiceState(_contextFactory, _userService, _botClient, _unitService, _operationService, _equipmentService, _stepService, _unit));
+                            FSMContextStorage.Set(update.Message.Chat.Id, _fsmcontext);
+                            await _botClient.GetBot().Result.SendTextMessageAsync(update.Message.Chat.Id, $"список оборудования узла {_unit.Name} пуст", replyMarkup: inlineKeyboard); ;
+                        }
+                        else
+                        {
+                            KeyboardButton[][] keyboardButtonsDelete = new KeyboardButton[_equipments.Count][];
+                            for (int i = 0; i < _equipments.Count; i++)
+                                keyboardButtonsDelete[i] = new KeyboardButton[1] { new KeyboardButton(_equipments[i].Name) };
+                            var inlineKeyboardDelete = new ReplyKeyboardMarkup(keyboardButtonsDelete);
+                            _fsmcontext.TransitionTo(this);
+                            FSMContextStorage.Set(update.Message.Chat.Id, _fsmcontext);
+                            const string messageDelete = "Выберите оборудование из списка для удаления";
+                            await _botClient.GetBot().Result.SendTextMessageAsync(update.Message.Chat.Id, messageDelete, replyMarkup: inlineKeyboardDelete);
+                        }
                         break;
                     default:
                         if (_isOperationCreate)
@@ -83,7 +98,7 @@ namespace Eassistance.BuisnessLogic.FSM
                             var inlineKeyboard = new ReplyKeyboardMarkup(new[] { new[] { new KeyboardButton("OK") } });
                             if (_isAddEquipment)
                             {
-                                _fsmcontext.TransitionTo(new EquipmentChoiceState(_contextFactory, _userService, _botClient, _unitService, _operationService, _equipmentService, _stepService));
+                                _fsmcontext.TransitionTo(new EquipmentChoiceState(_contextFactory, _userService, _botClient, _unitService, _operationService, _equipmentService, _stepService, _unit));
                                 FSMContextStorage.Set(update.Message.Chat.Id, _fsmcontext);
                                 await _botClient.GetBot().Result.SendTextMessageAsync(update.Message.Chat.Id, $"{_addedEquipment.Name} добавлен", replyMarkup: inlineKeyboard);
                             }
@@ -93,9 +108,6 @@ namespace Eassistance.BuisnessLogic.FSM
                                 FSMContextStorage.Set(update.Message.Chat.Id, _fsmcontext);
                                 await _botClient.GetBot().Result.SendTextMessageAsync(update.Message.Chat.Id, $"{_addedEquipment.Name} не удалось добавить", replyMarkup: inlineKeyboard);
                             }
-                            _addedEquipment = null;
-                            _isAddEquipment = false;
-                            _isOperationCreate = false;
                         }
                         if (_isOperationDelete)
                         {
@@ -107,22 +119,17 @@ namespace Eassistance.BuisnessLogic.FSM
                                 _isRemovedEquipment = await _equipmentService.DeleteEquipment(_removedEquipment);
                                 if (_isRemovedEquipment)
                                 {
-                                    _fsmcontext.TransitionTo(new EquipmentChoiceState(_contextFactory, _userService, _botClient, _unitService, _operationService, _equipmentService, _stepService));
+                                    _fsmcontext.TransitionTo(new EquipmentChoiceState(_contextFactory, _userService, _botClient, _unitService, _operationService, _equipmentService, _stepService, _unit));
                                     FSMContextStorage.Set(update.Message.Chat.Id, _fsmcontext);
                                     await _botClient.GetBot().Result.SendTextMessageAsync(update.Message.Chat.Id, $"{_removedEquipment.Name} удален", replyMarkup: inlineKeyboard);
                                 }
                                 else
                                 {
-                                    _fsmcontext.TransitionTo(new EquipmentChoiceState(_contextFactory, _userService, _botClient, _unitService, _operationService, _equipmentService, _stepService));
+                                    _fsmcontext.TransitionTo(new EquipmentChoiceState(_contextFactory, _userService, _botClient, _unitService, _operationService, _equipmentService, _stepService, _unit));
                                     FSMContextStorage.Set(update.Message.Chat.Id, _fsmcontext);
                                     await _botClient.GetBot().Result.SendTextMessageAsync(update.Message.Chat.Id, $"{_removedEquipment.Name} не удалось удалить", replyMarkup: inlineKeyboard);
                                 }
                             }
-                            _isOperationDelete = false;
-                            _isRemovedEquipment = false;
-                            _removedEquipment = null;
-                            _fsmcontext.TransitionTo(new EquipmentChoiceState(_contextFactory, _userService, _botClient, _unitService, _operationService, _equipmentService, _stepService));
-                            FSMContextStorage.Set(update.Message.Chat.Id, _fsmcontext);
                         }
                         break;
                 }

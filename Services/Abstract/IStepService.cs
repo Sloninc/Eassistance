@@ -5,7 +5,7 @@ namespace Eassistance.Services.Abstract
     {
         Task<List<Step>> GetAllSteps(Operation operation);
         Task<bool> CreateStep(Step step);
-        Task<Step> GetStepById(Guid id);
+        Task<Step> GetStepByName(string name);
         Task<bool> DeleteStep(Step step);
     }
 }

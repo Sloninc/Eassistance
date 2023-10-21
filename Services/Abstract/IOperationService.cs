@@ -5,7 +5,7 @@ namespace Eassistance.Services.Abstract
     {
         Task<List<Operation>> GetAllOperations(Equipment equipment);
         Task<bool> CreateOperation(Operation operation);
-        Task<Operation> GetOperationById(Guid id);
+        Task<Operation> GetOperationByName(string Name);
         Task<bool> DeleteOperation(Operation operation);
     }
 }
