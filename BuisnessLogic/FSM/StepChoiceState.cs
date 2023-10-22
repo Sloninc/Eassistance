@@ -13,7 +13,7 @@ namespace Eassistance.BuisnessLogic.FSM
     public class StepChoiceState : BaseState
     {
         Operation _currentOperation;
-        public StepChoiceState(IDbContextFactory<DataContext> contextFactory, IUserService userService, TelegramBot telegramBot, IUnitService unitService, IOperationService operationService, IEquipmentService equipmentService, IStepService stepService, Operation currentOperation = null) : base(contextFactory, userService, telegramBot, unitService, operationService, equipmentService, stepService)
+        public StepChoiceState(IUserService userService, TelegramBot telegramBot, IUnitService unitService, IOperationService operationService, IEquipmentService equipmentService, IStepService stepService, Operation currentOperation = null) : base(userService, telegramBot, unitService, operationService, equipmentService, stepService)
         {
             Name = "StepChoice";
             _currentOperation = currentOperation;
@@ -29,14 +29,20 @@ namespace Eassistance.BuisnessLogic.FSM
                 if (update.Message.Text == "OK")
                 {
                     operation = _currentOperation;
-                    _fsmcontext.TransitionTo(new StepState(_contextFactory, _userService, _botClient, _unitService, _operationService, _equipmentService, _stepService, operation));
+                    _fsmcontext.TransitionTo(new StepState(_userService, _botClient, _unitService, _operationService, _equipmentService, _stepService, operation));
                     FSMContextStorage.Set(update.Message.Chat.Id, _fsmcontext);
                     await _botClient.GetBot().Result.SendTextMessageAsync(update.Message.Chat.Id, $"Операция {operation.Name}", replyMarkup: inlineKeyboard);
+                }
+                else if (update.Message.Text == "/start")
+                {
+                    _fsmcontext.TransitionTo(new StartState(_userService, _botClient, _unitService, _operationService, _equipmentService, _stepService));
+                    FSMContextStorage.Set(update.Message.Chat.Id, _fsmcontext);
+                    _fsmcontext.Request(update);
                 }
                 else
                 {
                     operation = await _operationService.GetOperationByName(update.Message.Text);
-                    _fsmcontext.TransitionTo(new StepState(_contextFactory, _userService, _botClient, _unitService, _operationService, _equipmentService, _stepService, operation));
+                    _fsmcontext.TransitionTo(new StepState(_userService, _botClient, _unitService, _operationService, _equipmentService, _stepService, operation));
                     FSMContextStorage.Set(update.Message.Chat.Id, _fsmcontext);
                     await _botClient.GetBot().Result.SendTextMessageAsync(update.Message.Chat.Id, $"Операция {operation.Name}", replyMarkup: inlineKeyboard);
                 }

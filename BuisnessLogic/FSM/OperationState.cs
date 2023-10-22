@@ -12,7 +12,7 @@ namespace Eassistance.BuisnessLogic.FSM
 {
     public class OperationState : BaseState
     {
-        public OperationState(IDbContextFactory<DataContext> contextFactory, IUserService userService, TelegramBot telegramBot, IUnitService unitService, IOperationService operationService, IEquipmentService equipmentService, IStepService stepService, Equipment equipment) : base(contextFactory, userService, telegramBot, unitService, operationService, equipmentService, stepService)
+        public OperationState(IUserService userService, TelegramBot telegramBot, IUnitService unitService, IOperationService operationService, IEquipmentService equipmentService, IStepService stepService, Equipment equipment) : base(userService, telegramBot, unitService, operationService, equipmentService, stepService)
         {
             Name = "Operation";
             _equipment = equipment;
@@ -34,7 +34,7 @@ namespace Eassistance.BuisnessLogic.FSM
                 switch (update.Message.Text)
                 {
                     case "/start":
-                        _fsmcontext.TransitionTo(new StartState(_contextFactory, _userService, _botClient, _unitService, _operationService, _equipmentService, _stepService));
+                        _fsmcontext.TransitionTo(new StartState(_userService, _botClient, _unitService, _operationService, _equipmentService, _stepService));
                         FSMContextStorage.Set(update.Message.Chat.Id, _fsmcontext);
                         _fsmcontext.Request(update);
                         break;
@@ -44,7 +44,7 @@ namespace Eassistance.BuisnessLogic.FSM
                         {
                             var inlineKeyboard = new ReplyKeyboardMarkup(new[] { new[] { new KeyboardButton("OK") } });
                             inlineKeyboard.ResizeKeyboard = true;
-                            _fsmcontext.TransitionTo(new OperationChoiceState(_contextFactory, _userService, _botClient, _unitService, _operationService, _equipmentService, _stepService, _equipment));
+                            _fsmcontext.TransitionTo(new OperationChoiceState(_userService, _botClient, _unitService, _operationService, _equipmentService, _stepService, _equipment));
                             FSMContextStorage.Set(update.Message.Chat.Id, _fsmcontext);
                             await _botClient.GetBot().Result.SendTextMessageAsync(update.Message.Chat.Id, $"список операций оборудования {_equipment.Name} пуст", replyMarkup: inlineKeyboard); ;
                         }
@@ -53,11 +53,11 @@ namespace Eassistance.BuisnessLogic.FSM
                             KeyboardButton[][] keyboardButtons = new KeyboardButton[_operations.Count][];
                             for (int i = 0; i < _operations.Count; i++)
                                 keyboardButtons[i] = new KeyboardButton[1] { new KeyboardButton(_operations[i].Name) };
-                            _fsmcontext.TransitionTo(new StepChoiceState(_contextFactory, _userService, _botClient, _unitService, _operationService, _equipmentService, _stepService));
+                            _fsmcontext.TransitionTo(new StepChoiceState(_userService, _botClient, _unitService, _operationService, _equipmentService, _stepService));
                             FSMContextStorage.Set(update.Message.Chat.Id, _fsmcontext);
                             var inlineKeyboard = new ReplyKeyboardMarkup(keyboardButtons);
                             string message = $"Выберите тип операции на оборудовании {_equipment.Name}";
-                            await _botClient.GetBot().Result.SendTextMessageAsync(update.Message.Chat.Id, message, replyMarkup: inlineKeyboard);
+                            await _botClient.GetBot().Result.SendTextMessageAsync(  update.Message.Chat.Id, message, replyMarkup: inlineKeyboard);
                         }
                         break;
                     case "Добавить операцию":
@@ -73,7 +73,7 @@ namespace Eassistance.BuisnessLogic.FSM
                         {
                             var inlineKeyboard = new ReplyKeyboardMarkup(new[] { new[] { new KeyboardButton("OK") } });
                             inlineKeyboard.ResizeKeyboard = false;
-                            _fsmcontext.TransitionTo(new OperationChoiceState(_contextFactory, _userService, _botClient, _unitService, _operationService, _equipmentService, _stepService, _equipment));
+                            _fsmcontext.TransitionTo(new OperationChoiceState(_userService, _botClient, _unitService, _operationService, _equipmentService, _stepService, _equipment));
                             FSMContextStorage.Set(update.Message.Chat.Id, _fsmcontext);
                             await _botClient.GetBot().Result.SendTextMessageAsync(update.Message.Chat.Id, $"список оперций на оборудовании {_equipment.Name} пуст", replyMarkup: inlineKeyboard); ;
                         }
@@ -97,13 +97,13 @@ namespace Eassistance.BuisnessLogic.FSM
                             var inlineKeyboard = new ReplyKeyboardMarkup(new[] { new[] { new KeyboardButton("OK") } });
                             if (_isAddOperation)
                             {
-                                _fsmcontext.TransitionTo(new OperationChoiceState(_contextFactory, _userService, _botClient, _unitService, _operationService, _equipmentService, _stepService, _equipment));
+                                _fsmcontext.TransitionTo(new OperationChoiceState(_userService, _botClient, _unitService, _operationService, _equipmentService, _stepService, _equipment));
                                 FSMContextStorage.Set(update.Message.Chat.Id, _fsmcontext);
                                 await _botClient.GetBot().Result.SendTextMessageAsync(update.Message.Chat.Id, $"{_addedOperation.Name} добавлен", replyMarkup: inlineKeyboard);
                             }
                             else
                             {
-                                _fsmcontext.TransitionTo(new OperationChoiceState(_contextFactory, _userService, _botClient, _unitService, _operationService, _equipmentService, _stepService));
+                                _fsmcontext.TransitionTo(new OperationChoiceState(_userService, _botClient, _unitService, _operationService, _equipmentService, _stepService));
                                 FSMContextStorage.Set(update.Message.Chat.Id, _fsmcontext);
                                 await _botClient.GetBot().Result.SendTextMessageAsync(update.Message.Chat.Id, $"{_addedOperation.Name} не удалось добавить", replyMarkup: inlineKeyboard);
                             }
@@ -118,13 +118,13 @@ namespace Eassistance.BuisnessLogic.FSM
                                 _isRemovedOperation = await _operationService.DeleteOperation(_removedOperation);
                                 if (_isRemovedOperation)
                                 {
-                                    _fsmcontext.TransitionTo(new OperationChoiceState(_contextFactory, _userService, _botClient, _unitService, _operationService, _equipmentService, _stepService, _equipment));
+                                    _fsmcontext.TransitionTo(new OperationChoiceState(_userService, _botClient, _unitService, _operationService, _equipmentService, _stepService, _equipment));
                                     FSMContextStorage.Set(update.Message.Chat.Id, _fsmcontext);
                                     await _botClient.GetBot().Result.SendTextMessageAsync(update.Message.Chat.Id, $"{_removedOperation.Name} удален", replyMarkup: inlineKeyboard);
                                 }
                                 else
                                 {
-                                    _fsmcontext.TransitionTo(new OperationChoiceState(_contextFactory, _userService, _botClient, _unitService, _operationService, _equipmentService, _stepService, _equipment));
+                                    _fsmcontext.TransitionTo(new OperationChoiceState(_userService, _botClient, _unitService, _operationService, _equipmentService, _stepService, _equipment));
                                     FSMContextStorage.Set(update.Message.Chat.Id, _fsmcontext);
                                     await _botClient.GetBot().Result.SendTextMessageAsync(update.Message.Chat.Id, $"{_removedOperation.Name} не удалось удалить", replyMarkup: inlineKeyboard);
                                 }

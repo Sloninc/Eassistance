@@ -12,7 +12,7 @@ namespace Eassistance.BuisnessLogic.FSM
 {
     public class StepRunState : BaseState
     {
-        public StepRunState(IDbContextFactory<DataContext> contextFactory, IUserService userService, TelegramBot telegramBot, IUnitService unitService, IOperationService operationService, IEquipmentService equipmentService, IStepService stepService, Operation operation) : base(contextFactory, userService, telegramBot, unitService, operationService, equipmentService, stepService)
+        public StepRunState(IUserService userService, TelegramBot telegramBot, IUnitService unitService, IOperationService operationService, IEquipmentService equipmentService, IStepService stepService, Operation operation) : base(userService, telegramBot, unitService, operationService, equipmentService, stepService)
         {
             Name = "StepRun";
             _operation = operation;
@@ -25,14 +25,22 @@ namespace Eassistance.BuisnessLogic.FSM
         {
             try
             {
-                var inlineKeyboard = new ReplyKeyboardMarkup(new[] { new[] { new KeyboardButton("Предыдущий шаг операции"), new KeyboardButton("Следующий шаг операции") } });
+                var inlineKeyboard = new ReplyKeyboardMarkup(new[] { 
+                    new[] { new KeyboardButton("Предыдущий шаг операции"), new KeyboardButton("Следующий шаг операции") },
+                    new[] { new KeyboardButton("Вернуться к списку шагов операции")} });
                 inlineKeyboard.ResizeKeyboard = true;
                 _steps = await _stepService.GetAllSteps(_operation);
                 switch (update.Message.Text)
                 {
                     case "/start":
-                        _fsmcontext.TransitionTo(new StartState(_contextFactory, _userService, _botClient, _unitService, _operationService, _equipmentService, _stepService));
+                        _fsmcontext.TransitionTo(new StartState(_userService, _botClient, _unitService, _operationService, _equipmentService, _stepService));
                         FSMContextStorage.Set(update.Message.Chat.Id, _fsmcontext);
+                        _fsmcontext.Request(update);
+                        break;
+                    case "Вернуться к списку шагов операции":
+                        _fsmcontext.TransitionTo(new StepState(_userService, _botClient, _unitService, _operationService, _equipmentService, _stepService, _operation));
+                        FSMContextStorage.Set(update.Message.Chat.Id, _fsmcontext);
+                        update.Message.Text = "Проведение операции";
                         _fsmcontext.Request(update);
                         break;
                     case "Предыдущий шаг операции":

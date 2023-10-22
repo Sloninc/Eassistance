@@ -1,8 +1,5 @@
-﻿using Eassistance.Infrastructure;
-using Eassistance.Domain;
-using Microsoft.EntityFrameworkCore;
+﻿using Eassistance.Domain;
 using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 using Eassistance.Services;
 using Eassistance.Services.Abstract;
@@ -12,8 +9,7 @@ namespace Eassistance.BuisnessLogic.FSM
 {
     public class RegistrationState:BaseState
     {
-
-        public RegistrationState(IDbContextFactory<DataContext> contextFactory, IUserService userService, TelegramBot telegramBot, IUnitService unitService, IOperationService operationService, IEquipmentService equipmentService, IStepService stepService) : base(contextFactory, userService, telegramBot, unitService, operationService, equipmentService, stepService)
+        public RegistrationState(IUserService userService, TelegramBot telegramBot, IUnitService unitService, IOperationService operationService, IEquipmentService equipmentService, IStepService stepService) : base(userService, telegramBot, unitService, operationService, equipmentService, stepService)
         {
             Name = "registration";
         }
@@ -42,22 +38,15 @@ namespace Eassistance.BuisnessLogic.FSM
                             };
                             if (user.Username == null)
                                 user.Username = user.FirstName;
-                            using (var _context = _contextFactory.CreateDbContext())
+                            var isreg = await _userService.CreateUser(user);
+                            if (isreg)
                             {
-                                await _context.Users.AddAsync(user);
-                                await _context.SaveChangesAsync();
+                                var inlineKeyboard = new ReplyKeyboardMarkup(new[] { new[] { new KeyboardButton("OK") } });
+                                inlineKeyboard.ResizeKeyboard = true;
+                                await _botClient.GetBot().Result.SendTextMessageAsync(update.Message.Chat.Id, $"{update.Message.Text} зарегистрирован", replyMarkup: inlineKeyboard);
+                                _fsmcontext.TransitionTo(new StartState(_userService, _botClient, _unitService, _operationService, _equipmentService, _stepService));
+                                FSMContextStorage.Set(update.Message.Chat.Id, _fsmcontext);
                             }
-                            var inlineKeyboard = new ReplyKeyboardMarkup(new[]
-                            {
-                            new[]
-                                {
-                                    new KeyboardButton("OK")
-                                }
-                            });
-                            inlineKeyboard.ResizeKeyboard = true;
-                            await _botClient.GetBot().Result.SendTextMessageAsync(update.Message.Chat.Id, $"{update.Message.Text} зарегистрирован", replyMarkup: inlineKeyboard);
-                            _fsmcontext.TransitionTo(new StartState(_contextFactory, _userService, _botClient, _unitService, _operationService, _equipmentService, _stepService));
-                            FSMContextStorage.Set(update.Message.Chat.Id, _fsmcontext);
                         }
                         break;
                 }

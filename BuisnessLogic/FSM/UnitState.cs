@@ -12,7 +12,7 @@ namespace Eassistance.BuisnessLogic.FSM
 {
     public class UnitState: BaseState
     {
-        public UnitState(IDbContextFactory<DataContext> contextFactory, IUserService userService, TelegramBot telegramBot, IUnitService unitService, IOperationService operationService, IEquipmentService equipmentService, IStepService stepService) : base(contextFactory, userService, telegramBot, unitService, operationService, equipmentService, stepService)
+        public UnitState(IUserService userService, TelegramBot telegramBot, IUnitService unitService, IOperationService operationService, IEquipmentService equipmentService, IStepService stepService) : base(userService, telegramBot, unitService, operationService, equipmentService, stepService)
         {
             Name = "Units";
         }
@@ -31,7 +31,7 @@ namespace Eassistance.BuisnessLogic.FSM
                 switch (update.Message.Text)
                 {
                     case "/start":
-                        _fsmcontext.TransitionTo(new StartState(_contextFactory, _userService, _botClient, _unitService, _operationService, _equipmentService, _stepService));
+                        _fsmcontext.TransitionTo(new StartState(_userService, _botClient, _unitService, _operationService, _equipmentService, _stepService));
                         FSMContextStorage.Set(update.Message.Chat.Id, _fsmcontext);
                         _fsmcontext.Request(update);
                         break;
@@ -41,7 +41,7 @@ namespace Eassistance.BuisnessLogic.FSM
                         {
                             var inlineKeyboard = new ReplyKeyboardMarkup(new[] { new[] { new KeyboardButton("OK") } });
                             inlineKeyboard.ResizeKeyboard = false;
-                            _fsmcontext.TransitionTo(new StartState(_contextFactory, _userService, _botClient, _unitService, _operationService, _equipmentService, _stepService));
+                            _fsmcontext.TransitionTo(new StartState(_userService, _botClient, _unitService, _operationService, _equipmentService, _stepService));
                             FSMContextStorage.Set(update.Message.Chat.Id, _fsmcontext);
                             await _botClient.GetBot().Result.SendTextMessageAsync(update.Message.Chat.Id, "список узлов пуст", replyMarkup: inlineKeyboard);
                         }
@@ -50,7 +50,7 @@ namespace Eassistance.BuisnessLogic.FSM
                             KeyboardButton[][] keyboardButtons = new KeyboardButton[_units.Count][];
                             for (int i = 0; i < _units.Count; i++)
                                 keyboardButtons[i] = new KeyboardButton[1] { new KeyboardButton(_units[i].Name) };
-                            _fsmcontext.TransitionTo(new EquipmentChoiceState(_contextFactory, _userService, _botClient, _unitService, _operationService, _equipmentService, _stepService));
+                            _fsmcontext.TransitionTo(new EquipmentChoiceState(_userService, _botClient, _unitService, _operationService, _equipmentService, _stepService));
                             FSMContextStorage.Set(update.Message.Chat.Id, _fsmcontext);
                             var inlineKeyboard = new ReplyKeyboardMarkup(keyboardButtons);
                             const string message = "Выберите узел из списка";
@@ -80,13 +80,13 @@ namespace Eassistance.BuisnessLogic.FSM
                             inlineKeyboard.ResizeKeyboard = true;
                             if (_isAddUnit)
                             {
-                                _fsmcontext.TransitionTo(new StartState(_contextFactory, _userService, _botClient, _unitService, _operationService, _equipmentService, _stepService));
+                                _fsmcontext.TransitionTo(new StartState(_userService, _botClient, _unitService, _operationService, _equipmentService, _stepService));
                                 FSMContextStorage.Set(update.Message.Chat.Id, _fsmcontext);
                                 await _botClient.GetBot().Result.SendTextMessageAsync(update.Message.Chat.Id, $"{_addedUnit.Name} добавлен", replyMarkup: inlineKeyboard);
                             }
                             else
                             {
-                                _fsmcontext.TransitionTo(new StartState(_contextFactory, _userService, _botClient, _unitService, _operationService, _equipmentService, _stepService));
+                                _fsmcontext.TransitionTo(new StartState(_userService, _botClient, _unitService, _operationService, _equipmentService, _stepService));
                                 FSMContextStorage.Set(update.Message.Chat.Id, _fsmcontext);
                                 await _botClient.GetBot().Result.SendTextMessageAsync(update.Message.Chat.Id, $"{_addedUnit.Name} не удалось добавить", replyMarkup: inlineKeyboard);
                             }
@@ -104,13 +104,13 @@ namespace Eassistance.BuisnessLogic.FSM
                                 _isRemovedUnit = await _unitService.DeleteUnit(_removedUnit);
                                 if (_isRemovedUnit)
                                 {
-                                    _fsmcontext.TransitionTo(new StartState(_contextFactory, _userService, _botClient, _unitService, _operationService, _equipmentService, _stepService));
+                                    _fsmcontext.TransitionTo(new StartState(_userService, _botClient, _unitService, _operationService, _equipmentService, _stepService));
                                     FSMContextStorage.Set(update.Message.Chat.Id, _fsmcontext);
                                     await _botClient.GetBot().Result.SendTextMessageAsync(update.Message.Chat.Id, $"{_removedUnit.Name} удален", replyMarkup: inlineKeyboard);
                                 }
                                 else
                                 {
-                                    _fsmcontext.TransitionTo(new StartState(_contextFactory, _userService, _botClient, _unitService, _operationService, _equipmentService, _stepService));
+                                    _fsmcontext.TransitionTo(new StartState(_userService, _botClient, _unitService, _operationService, _equipmentService, _stepService));
                                     FSMContextStorage.Set(update.Message.Chat.Id, _fsmcontext);
                                     await _botClient.GetBot().Result.SendTextMessageAsync(update.Message.Chat.Id, $"{_removedUnit.Name} не удалось удалить", replyMarkup: inlineKeyboard);
                                 }
@@ -118,7 +118,7 @@ namespace Eassistance.BuisnessLogic.FSM
                             _isOperationDelete = false;
                             _isRemovedUnit = false;
                             _removedUnit = null;
-                            _fsmcontext.TransitionTo(new StartState(_contextFactory, _userService, _botClient, _unitService, _operationService, _equipmentService, _stepService));
+                            _fsmcontext.TransitionTo(new StartState(_userService, _botClient, _unitService, _operationService, _equipmentService, _stepService));
                             FSMContextStorage.Set(update.Message.Chat.Id, _fsmcontext);
                         }
                         break;

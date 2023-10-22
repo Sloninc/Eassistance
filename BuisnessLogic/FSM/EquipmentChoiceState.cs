@@ -13,7 +13,7 @@ namespace Eassistance.BuisnessLogic.FSM
     public class EquipmentChoiceState:BaseState
     {
         Unit _currentUnit;
-        public EquipmentChoiceState(IDbContextFactory<DataContext> contextFactory, IUserService userService, TelegramBot telegramBot, IUnitService unitService, IOperationService operationService, IEquipmentService equipmentService, IStepService stepService, Unit currentunit=null) : base(contextFactory, userService, telegramBot, unitService, operationService, equipmentService, stepService)
+        public EquipmentChoiceState(IUserService userService, TelegramBot telegramBot, IUnitService unitService, IOperationService operationService, IEquipmentService equipmentService, IStepService stepService, Unit currentunit=null) : base(userService, telegramBot, unitService, operationService, equipmentService, stepService)
         {
             Name = "EqipmentChoice";
             _currentUnit = currentunit;
@@ -29,14 +29,20 @@ namespace Eassistance.BuisnessLogic.FSM
                 if (update.Message.Text == "OK")
                 {
                     unit = _currentUnit;
-                    _fsmcontext.TransitionTo(new EquipmentState(_contextFactory, _userService, _botClient, _unitService, _operationService, _equipmentService, _stepService, unit));
+                    _fsmcontext.TransitionTo(new EquipmentState(_userService, _botClient, _unitService, _operationService, _equipmentService, _stepService, unit));
                     FSMContextStorage.Set(update.Message.Chat.Id, _fsmcontext);
                     await _botClient.GetBot().Result.SendTextMessageAsync(update.Message.Chat.Id, $"Узел связи {unit.Name}", replyMarkup: inlineKeyboard);
+                }
+                else if(update.Message.Text == "/start")
+                {
+                    _fsmcontext.TransitionTo(new StartState(_userService, _botClient, _unitService, _operationService, _equipmentService, _stepService));
+                    FSMContextStorage.Set(update.Message.Chat.Id, _fsmcontext);
+                    _fsmcontext.Request(update);
                 }
                 else
                 {
                     unit = await _unitService.GetUnitByName(update.Message.Text);
-                    _fsmcontext.TransitionTo(new EquipmentState(_contextFactory, _userService, _botClient, _unitService, _operationService, _equipmentService, _stepService, unit));
+                    _fsmcontext.TransitionTo(new EquipmentState(_userService, _botClient, _unitService, _operationService, _equipmentService, _stepService, unit));
                     FSMContextStorage.Set(update.Message.Chat.Id, _fsmcontext);
                     await _botClient.GetBot().Result.SendTextMessageAsync(update.Message.Chat.Id, $"Узел связи {unit.Name}", replyMarkup: inlineKeyboard);
                 }
