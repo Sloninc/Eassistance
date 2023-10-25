@@ -47,7 +47,7 @@ namespace Eassistance.BuisnessLogic.FSM
                         if (_steps.Count == 0)
                         {
                             var inlineKeyboard = new ReplyKeyboardMarkup(new[] { new[] { new KeyboardButton("OK") } });
-                            inlineKeyboard.ResizeKeyboard = true;
+                            inlineKeyboard.ResizeKeyboard = false;
                             _fsmcontext.TransitionTo(new StepChoiceState(_userService, _botClient, _unitService, _operationService, _equipmentService, _stepService, _operation));
                             FSMContextStorage.Set(update.Message.Chat.Id, _fsmcontext);
                             await _botClient.GetBot().Result.SendTextMessageAsync(update.Message.Chat.Id, $"шаги операций {_operation.Name} отсутствуют", replyMarkup: inlineKeyboard); ;

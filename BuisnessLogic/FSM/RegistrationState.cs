@@ -42,7 +42,7 @@ namespace Eassistance.BuisnessLogic.FSM
                             if (isreg)
                             {
                                 var inlineKeyboard = new ReplyKeyboardMarkup(new[] { new[] { new KeyboardButton("OK") } });
-                                inlineKeyboard.ResizeKeyboard = true;
+                                inlineKeyboard.ResizeKeyboard = false;
                                 await _botClient.GetBot().Result.SendTextMessageAsync(update.Message.Chat.Id, $"{update.Message.Text} зарегистрирован", replyMarkup: inlineKeyboard);
                                 _fsmcontext.TransitionTo(new StartState(_userService, _botClient, _unitService, _operationService, _equipmentService, _stepService));
                                 FSMContextStorage.Set(update.Message.Chat.Id, _fsmcontext);

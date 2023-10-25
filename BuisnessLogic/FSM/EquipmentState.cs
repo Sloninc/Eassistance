@@ -112,7 +112,7 @@ namespace Eassistance.BuisnessLogic.FSM
                         if (_isOperationDelete)
                         {
                             var inlineKeyboard = new ReplyKeyboardMarkup(new[] { new[] { new KeyboardButton("OK") } });
-                            inlineKeyboard.ResizeKeyboard = true;
+                            inlineKeyboard.ResizeKeyboard = false;
                             _removedEquipment = await _equipmentService.GetEquipmentByName(update.Message.Text);
                             if (_removedEquipment != null)
                             {

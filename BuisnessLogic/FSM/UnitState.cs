@@ -10,6 +10,7 @@ using Telegram.Bot;
 
 namespace Eassistance.BuisnessLogic.FSM
 {
+    //класс для работы у узлами связи
     public class UnitState: BaseState
     {
         public UnitState(IUserService userService, TelegramBot telegramBot, IUnitService unitService, IOperationService operationService, IEquipmentService equipmentService, IStepService stepService) : base(userService, telegramBot, unitService, operationService, equipmentService, stepService)
@@ -37,7 +38,7 @@ namespace Eassistance.BuisnessLogic.FSM
                         break;
                     case "Список узлов":
                         _units = await _unitService.GetAllUnits();
-                        if (_units.Count==0)
+                        if (_units.Count==0)// если список узлов пуст
                         {
                             var inlineKeyboard = new ReplyKeyboardMarkup(new[] { new[] { new KeyboardButton("OK") } });
                             inlineKeyboard.ResizeKeyboard = false;
@@ -46,7 +47,7 @@ namespace Eassistance.BuisnessLogic.FSM
                             await _botClient.GetBot().Result.SendTextMessageAsync(update.Message.Chat.Id, "список узлов пуст", replyMarkup: inlineKeyboard);
                         }
                         else
-                        {
+                        {     //вывод списка узлов с предложением выбора
                             KeyboardButton[][] keyboardButtons = new KeyboardButton[_units.Count][];
                             for (int i = 0; i < _units.Count; i++)
                                 keyboardButtons[i] = new KeyboardButton[1] { new KeyboardButton(_units[i].Name) };

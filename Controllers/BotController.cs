@@ -25,10 +25,10 @@ namespace Eassistance.Controllers
             }
             try
             {
-                var context = FSMContextStorage.Get(update.Message.Chat.Id);
+                var context = FSMContextStorage.Get(update.Message.Chat.Id);// вынимаем контекст машины состояний из класса хранения контекстов пользователей
                 if(context == null)
-                    context = _fsmContext;
-                await context.Request(update);
+                    context = _fsmContext;// или получаем новый контекст
+                await context.Request(update);// обработка update текущим состоянием пользователя
             }
             catch (Exception e)
             {

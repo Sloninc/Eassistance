@@ -6,6 +6,7 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace Eassistance.BuisnessLogic.FSM
 {
+    //базовый абстрактный класс состояния
     public abstract class BaseState
     {
         protected FSMContext _fsmcontext;
@@ -24,13 +25,15 @@ namespace Eassistance.BuisnessLogic.FSM
             _equipmentService = equipmentService;
             _stepService = stepService;
         }
+        //при смене состояния передаем ему контекст
         public void SetContext(FSMContext fsmcontext)
         {
             _fsmcontext = fsmcontext;
         }
         public abstract string Name { get; }
+        // метод для обработки update текущим состоянием пользователя
         public abstract Task Handle(Update update);
-
+        //для вывода меню трехкнопочного
         protected ReplyKeyboardMarkup GetTrheeKeyboard(string btn1, string btn2, string btn3)
         {
             KeyboardButton[][] keyboardButtons = new KeyboardButton[3][];
@@ -38,7 +41,7 @@ namespace Eassistance.BuisnessLogic.FSM
             keyboardButtons[1] = new KeyboardButton[1] { new KeyboardButton(btn2) };
             keyboardButtons[2] = new KeyboardButton[1] { new KeyboardButton(btn3) };
             var inlineKeyboard = new ReplyKeyboardMarkup(keyboardButtons);
-            inlineKeyboard.ResizeKeyboard = true;
+            inlineKeyboard.ResizeKeyboard = false;
             return inlineKeyboard;
         }
     }

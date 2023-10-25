@@ -2,6 +2,7 @@
 
 namespace Eassistance.BuisnessLogic.FSM
 {
+    //класс для хранения пользовательских контекстов
     public static class FSMContextStorage
     {
         private static Dictionary<ChatId,FSMContext> _storage = new Dictionary<ChatId,FSMContext>();

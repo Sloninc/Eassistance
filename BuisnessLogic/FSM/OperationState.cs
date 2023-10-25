@@ -10,6 +10,7 @@ using Telegram.Bot;
 
 namespace Eassistance.BuisnessLogic.FSM
 {
+    //класс для работы с операциями на оборудовании
     public class OperationState : BaseState
     {
         public OperationState(IUserService userService, TelegramBot telegramBot, IUnitService unitService, IOperationService operationService, IEquipmentService equipmentService, IStepService stepService, Equipment equipment) : base(userService, telegramBot, unitService, operationService, equipmentService, stepService)
@@ -111,7 +112,7 @@ namespace Eassistance.BuisnessLogic.FSM
                         if (_isOperationDelete)
                         {
                             var inlineKeyboard = new ReplyKeyboardMarkup(new[] { new[] { new KeyboardButton("OK") } });
-                            inlineKeyboard.ResizeKeyboard = true;
+                            inlineKeyboard.ResizeKeyboard = false;
                             _removedOperation = await _operationService.GetOperationByName(update.Message.Text);
                             if (_removedOperation != null)
                             {
